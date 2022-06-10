@@ -3,7 +3,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import * as methodOverride from 'method-override';
 import { BitcoinRPC } from './libs/bitcoin.rpc';
 import { ENV } from './libs/environment';
-import { BFS } from './libs/file/read';
+import { UFS } from './libs/file/read';
 import { Partial } from './libs/partial';
 
 const env: ENV = new ENV();
@@ -13,8 +13,8 @@ const bitcoinRpc: BitcoinRPC = new BitcoinRPC(
   env.environments.BITCOIN_RPC_USER,
   env.environments.BITCOIN_RPC_PASSWORD
 );
-const bfs: BFS = new BFS(bitcoinRpc);
-const partial: Partial = new Partial(bfs);
+const ufs: UFS = new UFS(bitcoinRpc);
+const partial: Partial = new Partial(ufs);
 const app: express.Express = express();
 
 app.use(express.urlencoded({ extended: true, limit: 120000 }));

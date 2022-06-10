@@ -9,7 +9,7 @@ import {
 import { BitcoinRPC } from '../bitcoin.rpc';
 
 const TAG_HEX = Buffer.from('upfile ', 'ascii').toString('hex');
-export class BFS {
+export class UFS {
   private readonly bitcoinRpc: BitcoinRPC;
 
   public constructor(bitcoinRpc: BitcoinRPC) {
@@ -46,7 +46,7 @@ export class BFS {
     }
   }
 
-  public transactionBfsData(transaction: ITransaction): IFileBase {
+  public transactionUfsData(transaction: ITransaction): IFileBase {
     const outputIndex = transaction.vout.filter(
       (out) => out.scriptPubKey?.type === 'nulldata'
     )[0]?.n;
@@ -54,9 +54,9 @@ export class BFS {
       throw new Error('Data output not found.');
     }
 
-    const hex: string = BFS.removeOpCodes(transaction.vout[outputIndex].scriptPubKey.hex);
+    const hex: string = UFS.removeOpCodes(transaction.vout[outputIndex].scriptPubKey.hex);
     if (!hex) {
-      throw new Error('Not standard bfs transaction.');
+      throw new Error('Not standard ufs transaction.');
     }
 
     return JSON.parse(
@@ -74,17 +74,17 @@ export class BFS {
     if (outputIndex === undefined) {
       throw new Error('Data output not found.');
     }
-    const hex: string = BFS.removeOpCodes(transaction.vout[outputIndex].scriptPubKey.hex);
+    const hex: string = UFS.removeOpCodes(transaction.vout[outputIndex].scriptPubKey.hex);
     if (!hex) {
-      throw new Error('Not standard bfs transaction.');
+      throw new Error('Not standard ufs transaction.');
     }
 
     return Buffer.from(hex.startsWith(TAG_HEX) ? hex.slice(TAG_HEX.length) : hex, 'hex');
   }
 
-  public async stats(bfsSourceTx: string): Promise<IFileStats> {
-    const tx: ITransaction = await this.bitcoinRpc.txById(bfsSourceTx);
-    const file: IFileTransactionData = this.transactionBfsData(tx) as IFileTransactionData;
+  public async stats(ufsSourceTx: string): Promise<IFileStats> {
+    const tx: ITransaction = await this.bitcoinRpc.txById(ufsSourceTx);
+    const file: IFileTransactionData = this.transactionUfsData(tx) as IFileTransactionData;
     const stats: IFileStats = {
       size: file.size,
       chuncksize: file.chuncksize,
@@ -97,12 +97,12 @@ export class BFS {
   }
 
   public async read(
-    bfsSourceTx: string,
+    ufsSourceTx: string,
     from: number = 0,
     length?: number,
     readable?: ReadableStreamBuffer
   ): Promise<ReadableStreamBuffer> {
-    const stats: IFileStats = await this.stats(bfsSourceTx);
+    const stats: IFileStats = await this.stats(ufsSourceTx);
     if (!length) {
       length = stats.size;
     }
@@ -113,8 +113,8 @@ export class BFS {
       if (length > stats.size - from) {
         length = 0;
       }
-      const tx: ITransaction = await this.bitcoinRpc.txById(bfsSourceTx);
-      const file: IFileTransactionData = this.transactionBfsData(tx) as IFileTransactionData;
+      const tx: ITransaction = await this.bitcoinRpc.txById(ufsSourceTx);
+      const file: IFileTransactionData = this.transactionUfsData(tx) as IFileTransactionData;
       const buffer: Buffer = Buffer.from(file.data, 'base64');
       const finalBuffer: Buffer = buffer.slice(from, length === 0 ? 0 : from + length);
       readable.put(finalBuffer, 'binary');
@@ -122,8 +122,8 @@ export class BFS {
 
       return readable;
     }
-    const headerTx: ITransaction = await this.bitcoinRpc.txById(bfsSourceTx);
-    const header: IFileHeader = this.transactionBfsData(headerTx) as IFileHeader;
+    const headerTx: ITransaction = await this.bitcoinRpc.txById(ufsSourceTx);
+    const header: IFileHeader = this.transactionUfsData(headerTx) as IFileHeader;
     let blockIndex: number = Math.floor(from / header.chuncksize);
     let blockPointer: number = from % header.chuncksize;
     let fetched: number = 0;

@@ -2,13 +2,13 @@ import { Request, Response } from 'express';
 import { OutgoingHttpHeaders } from 'http';
 import { ReadableStreamBuffer } from 'stream-buffers';
 import { IFileStats } from '../../types/file';
-import { BFS } from './file/read';
+import { UFS } from './file/read';
 
 export class Partial {
-  private readonly bfs: BFS;
+  private readonly ufs: UFS;
 
-  public constructor(bfs: BFS) {
-    this.bfs = bfs;
+  public constructor(ufs: UFS) {
+    this.ufs = ufs;
   }
   public async resolve(request: Request, response: Response): Promise<void> {
     if (request.method !== 'GET') {
@@ -18,7 +18,7 @@ export class Partial {
     const filename: string = request.params.key.split('.')[0];
 
     // Check if file exists. If not, will return the 404 'Not Found'.
-    const stat: IFileStats = await this.bfs.stats(filename);
+    const stat: IFileStats = await this.ufs.stats(filename);
     if (!stat) {
       this.sendResponse(response, 404, undefined, undefined);
 
@@ -42,7 +42,7 @@ export class Partial {
 
       //  If not, will return file directly.
       this.sendResponse(response, 200, responseHeaders, readable);
-      this.bfs.read(filename, 0, stat.size, readable);
+      this.ufs.read(filename, 0, stat.size, readable);
 
       return;
     }
@@ -71,7 +71,7 @@ export class Partial {
 
     // Return the 206 'Partial Content'.
     this.sendResponse(response, 206, responseHeaders, readable);
-    await this.bfs.read(filename, start, end - start + 1, readable);
+    await this.ufs.read(filename, start, end - start + 1, readable);
 
     return;
   }
