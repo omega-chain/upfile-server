@@ -66,10 +66,11 @@ export class BFS {
     ) as IFileBase;
   }
 
-  public transactionData(transaction: ITransaction): Buffer {
-    const outputIndex = transaction.vout.filter(
-      (out) => out.scriptPubKey?.type === 'nulldata'
-    )[0]?.n;
+  public transactionData(transaction: ITransaction, index?: number): Buffer {
+    const outputIndex =
+      index !== undefined
+        ? index
+        : transaction.vout.filter((out) => out.scriptPubKey?.type === 'nulldata')[0]?.n;
     if (outputIndex === undefined) {
       throw new Error('Data output not found.');
     }
@@ -128,8 +129,11 @@ export class BFS {
     let fetched: number = 0;
     //let mainBuffer: Buffer = Buffer.alloc(0);
     while (fetched < length && blockIndex < header.chunks.length) {
+      const [txid, index] = header.chunks[blockIndex].split('_');
+      const transaction = await this.bitcoinRpc.txById(txid);
       const blockBuffer: Buffer = this.transactionData(
-        await this.bitcoinRpc.txById(header.chunks[blockIndex])
+        transaction,
+        index !== undefined ? +index : undefined
       );
       const remained: number = length - fetched;
       if (blockBuffer.length - blockPointer <= remained) {
