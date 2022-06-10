@@ -47,7 +47,14 @@ export class BFS {
   }
 
   public transactionBfsData(transaction: ITransaction): IFileBase {
-    const hex: string = BFS.removeOpCodes(transaction.vout[0].scriptPubKey.hex);
+    const outputIndex = transaction.vout.filter(
+      (out) => out.scriptPubKey?.type === 'nulldata'
+    )[0]?.n;
+    if (outputIndex === undefined) {
+      throw new Error('Data output not found.');
+    }
+
+    const hex: string = BFS.removeOpCodes(transaction.vout[outputIndex].scriptPubKey.hex);
     if (!hex) {
       throw new Error('Not standard bfs transaction.');
     }
@@ -60,7 +67,13 @@ export class BFS {
   }
 
   public transactionData(transaction: ITransaction): Buffer {
-    const hex: string = BFS.removeOpCodes(transaction.vout[0].scriptPubKey.hex);
+    const outputIndex = transaction.vout.filter(
+      (out) => out.scriptPubKey?.type === 'nulldata'
+    )[0]?.n;
+    if (outputIndex === undefined) {
+      throw new Error('Data output not found.');
+    }
+    const hex: string = BFS.removeOpCodes(transaction.vout[outputIndex].scriptPubKey.hex);
     if (!hex) {
       throw new Error('Not standard bfs transaction.');
     }
