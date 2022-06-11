@@ -1,0 +1,6 @@
+node_modules
+.env
+dist
+test.js
+start.sh
+package-lock.json
