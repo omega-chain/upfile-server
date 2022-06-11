@@ -1,4 +1,4 @@
-After upload the file by upfile-builder, you can use upfile-server to serve the uploaded file data
+After uploading the file by upfile-builder package, you can use upfile-server to serve the uploaded data.
 
 ## Capabilities
 
@@ -20,7 +20,7 @@ Rename `.env.sample` to `.env` and fill the environments, then run the bellow co
 node ./dist/index.js
 ```
 
-## How To Work
+## How To Call
 
 With upfile-handler you will receive a key that is transaction id
 
