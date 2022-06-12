@@ -25,3 +25,8 @@ node ./dist/index.js
 With upfile-handler you will receive a key that is transaction id
 
 `curl http[s]://host:port/key`
+
+One instance is up and running on https://cdn.upfile.space
+try it with https://cdn.upfile.space/<key>
+  i.e 
+  https://cdn.upfile.space/0f6f603b18f87921c28cc1ab1ac0f4028449aca6be26bd9d5cda388e0e22d648
