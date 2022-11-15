@@ -25,6 +25,18 @@ export class Partial {
       return;
     }
 
+    //Handle and response html file
+    if (stat.mime?.toLowerCase() === 'text/html') {
+      const htmlBuffer = await this.ufs.readTransactionBuffer(filename);
+      const html = htmlBuffer.toString('utf-8');
+      response.setHeader('Content-Type', 'text/html');
+
+      response.write(html);
+      response.end();
+
+      return;
+    }
+
     const responseHeaders: { [key: string]: any } = {};
     const rangeRequest: IRangeRequest = this.readRangeHeader(
       request.headers.range,

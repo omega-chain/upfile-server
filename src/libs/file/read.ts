@@ -96,6 +96,14 @@ export class UFS {
     return stats;
   }
 
+  public async readTransactionBuffer(txid: string): Promise<Buffer> {
+    const tx: ITransaction = await this.bitcoinRpc.txById(txid);
+    const file: IFileTransactionData = this.transactionUfsData(tx) as IFileTransactionData;
+    const buffer: Buffer = Buffer.from(file.data, 'base64');
+
+    return buffer;
+  }
+
   public async read(
     ufsSourceTx: string,
     from: number = 0,
@@ -113,9 +121,7 @@ export class UFS {
       if (length > stats.size - from) {
         length = 0;
       }
-      const tx: ITransaction = await this.bitcoinRpc.txById(ufsSourceTx);
-      const file: IFileTransactionData = this.transactionUfsData(tx) as IFileTransactionData;
-      const buffer: Buffer = Buffer.from(file.data, 'base64');
+      const buffer: Buffer = await this.readTransactionBuffer(ufsSourceTx);
       const finalBuffer: Buffer = buffer.slice(from, length === 0 ? 0 : from + length);
       readable.put(finalBuffer, 'binary');
       readable.stop();
